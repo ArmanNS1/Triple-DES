@@ -13,11 +13,9 @@ namespace DES
             Console.WriteLine("DES Algorithm Test Program");
             Console.WriteLine("========================\n");
 
-            // دریافت متن از کاربر
             Console.WriteLine("Please enter the text to encrypt:");
             string plaintext = Console.ReadLine() ?? "Default text for testing";
 
-            // دریافت کلید از کاربر
             Console.WriteLine("\nPlease enter the encryption key one (8 characters):");
             string keyInput1 = Console.ReadLine() ?? "TestKey1";
             byte[] key1 = Encoding.UTF8.GetBytes(keyInput1.PadRight(8)[..8]);
@@ -30,7 +28,6 @@ namespace DES
             string keyInput3 = Console.ReadLine() ?? "TestKey1";
             byte[] key3 = Encoding.UTF8.GetBytes(keyInput3.PadRight(8)[..8]);
 
-            // دریافت بردار اولیه
             Console.WriteLine(
                 "\nPlease enter the initial vector (8 characters) or leave it blank for default value:"
             );
@@ -39,7 +36,6 @@ namespace DES
 
             byte[] iv = Encoding.UTF8.GetBytes(ivInput.PadRight(8)[..8]);
 
-            // انتخاب حالت رمزنگاری
             Console.WriteLine("\nPlease select the encryption mode:");
             Console.WriteLine("1. ECB (Electronic Codebook)");
             Console.WriteLine("2. CBC (Cipher Block Chaining)");
@@ -50,14 +46,12 @@ namespace DES
             string modeInput = Console.ReadLine() ?? "1";
             if (!int.TryParse(modeInput, out int mode) || mode < 1 || mode > 5)
             {
-                mode = 1; // ECB به عنوان پیش‌فرض
+                mode = 1;
                 Console.WriteLine("Invalid mode. Using ECB mode.");
             }
 
-            // تبدیل متن به بایت
             byte[] plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
 
-            // اضافه کردن پدینگ برای اطمینان از اینکه طول داده مضربی از 8 است
             int paddingLength = 8 - (plaintextBytes.Length % 8);
             if (paddingLength < 8)
             {
@@ -70,7 +64,6 @@ namespace DES
                 plaintextBytes = paddedPlaintext;
             }
 
-            // ایجاد هندلر مناسب بر اساس حالت انتخاب شده
             OperationModeHandler handler1;
             OperationModeHandler handler2;
             OperationModeHandler handler3;
@@ -111,18 +104,15 @@ namespace DES
 
             try
             {
-                // رمزنگاری                           
                 Console.WriteLine("\nEncrypting...");
                 var  ciphertext = TDESEncryption(handler1, handler2, handler3, plaintextBytes);
                 string base64Ciphertext = Encoding.UTF8.GetString(ciphertext);
                 Console.WriteLine($"Encrypted text (Base64): {base64Ciphertext}");
 
-                // رمزگشایی
                 Console.WriteLine("\nDecrypting...");
 
                 byte[] decryptedBytes = TDESDecryption(handler1, handler2, handler3, ciphertext);
 
-                // حذف پدینگ
                 int lastByte = decryptedBytes[^1];
                 if (lastByte > 0 && lastByte <= 8)
                 {
@@ -146,17 +136,14 @@ namespace DES
 
                 string decryptedText = Encoding.UTF8.GetString(decryptedBytes);
                 Console.WriteLine($"Decrypted text: {decryptedText}");
-
-                // بررسی صحت رمزگشایی
+                
                 if (decryptedText == plaintext)
                 {
                     Console.WriteLine("\n✓ Encryption and decryption completed successfully!");
                 }
                 else
                 {
-                    Console.WriteLine(
-                        "\n✗ خطا در رمزگشایی! متن رمزگشایی شده با متن اصلی مطابقت ندارد."
-                    );
+                    Console.WriteLine("Error in decryption! The decrypted text does not match the original text.");
                 }
             }
             catch (Exception ex)
