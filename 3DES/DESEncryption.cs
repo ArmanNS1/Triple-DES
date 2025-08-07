@@ -17,7 +17,7 @@ namespace DES
                 63,55,47,39,31,23,15,7
         };
 
-        // Final permutation table (inverse of IP)
+        // Final permutation table
         private static readonly int[] FP = new int[]
         {
                 40,8,48,16,56,24,64,32,
@@ -30,7 +30,7 @@ namespace DES
                 33,1,41,9,49,17,57,25
         };
 
-        // Expansion box (E-box) - expands 32-bit block to 48 bits
+        // Expansion box (E-box)
         private static readonly int[] EBox = new int[]
         {
             32, 1, 2, 3, 4, 5,
@@ -56,7 +56,7 @@ namespace DES
             22, 11, 4, 25
         };
 
-        // S-boxes
+        // Shift boxes
         private static readonly int[,] SBox1 =
         {
             { 14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7 },
@@ -135,10 +135,10 @@ namespace DES
 
         public static BitArray EncryptBlock(BitArray plainBlock64, List<BitArray> roundKeys)
         {
-            // Step 1: Initial Permutation
+            //Initial Permutation
             BitArray permuted = Permute(plainBlock64, IP);
 
-            // Step 2: Split into L and R (32 bits each)
+            //Split into L and R
             BitArray L = new(32);
             BitArray R = new(32);
             for (int i = 0; i < 32; i++)
@@ -147,7 +147,7 @@ namespace DES
                 R[i] = permuted[i + 32];
             }
 
-            // Step 3: 16 Feistel rounds
+            //16 Feistel rounds
             for (int round = 0; round < 16; round++)
             {
                 BitArray previousR = R;
@@ -155,7 +155,7 @@ namespace DES
                 L = previousR;
             }
 
-            // Step 4: Combine R and L (note the swap!)
+            //Combine R and L
             BitArray preOutput = new(64);
             for (int i = 0; i < 32; i++)
             {
@@ -163,13 +163,12 @@ namespace DES
                 preOutput[i + 32] = L[i];
             }
 
-            // Step 5: Final Permutation
+            //Final Permutation
             return Permute(preOutput, FP);
         }
 
         public static BitArray DecryptBlock(BitArray cipherBlock64, List<BitArray> roundKeys)
         {
-            // Decryption is the same as encryption but with reversed round keys
             var reversedKeys = new List<BitArray>(roundKeys);
             reversedKeys.Reverse();
             return EncryptBlock(cipherBlock64, reversedKeys);
@@ -177,16 +176,16 @@ namespace DES
 
         private static BitArray F(BitArray right32, BitArray roundKey48)
         {
-            // Step 1: Expand 32-bit R to 48 bits
+            //Expand 32-bit R to 48 bits
             BitArray expandedRight = Permute(right32, EBox);
 
-            // Step 2: XOR with round key
+            //XOR with round key
             expandedRight.Xor(roundKey48);
 
-            // Step 3: S-box substitution (48 → 32 bits)
+            //S-box substitution (48 → 32 bits)
             BitArray sBoxOutput = SBoxSubstitution(expandedRight);
 
-            // Step 4: P-box permutation
+            //P-box permutation
             return Permute(sBoxOutput, PBox);
         }
 
@@ -196,7 +195,7 @@ namespace DES
             int inputIndex = 0;
             int outputIndex = 0;
 
-            // Process each 6-bit group through corresponding S-box
+            // Process each 6-bit group
             for (int sboxIndex = 0; sboxIndex < 8; sboxIndex++)
             {
                 // Extract 6 bits for current S-box
@@ -207,10 +206,8 @@ namespace DES
                     | (input48[inputIndex + 3] ? 2 : 0)
                     | (input48[inputIndex + 4] ? 1 : 0);
 
-                // Get 4-bit output from S-box
                 int value = SBoxes[sboxIndex][row, col];
-
-                // Convert to bits and add to output
+                
                 for (int bit = 3; bit >= 0; bit--)
                     output32[outputIndex + bit] = (value & (1 << bit)) != 0;
 
@@ -225,7 +222,7 @@ namespace DES
         {
             BitArray output = new(table.Length);
             for (int i = 0; i < table.Length; i++)
-                output[i] = input[table[i] - 1]; // DES tables are 1-indexed
+                output[i] = input[table[i] - 1];
             return output;
         }
     }
