@@ -4,7 +4,7 @@ namespace DES
 {
     public class DesKeyScheduler
     {
-        // Permuted Choice 1 (PC-1) table (64-bit to 56-bit, parity bits removed)
+        // Permuted Choice 1 (PC-1) table
         private static readonly int[] PC1 =
         {
             57,
@@ -65,7 +65,7 @@ namespace DES
             4
         };
 
-        // Permuted Choice 2 (PC-2) table (56-bit to 48-bit)
+        // Permuted Choice 2 (PC-2) table
         private static readonly int[] PC2 =
         {
             14,
@@ -125,9 +125,9 @@ namespace DES
         {
             // Convert key to BitArray and apply PC-1
             BitArray keyBits = new(initialKey64bit); // 64 bits
-            BitArray key56 = Permute(keyBits, PC1); // Remove parity → 56 bits
+            BitArray key56 = Permute(keyBits, PC1); // Remove parity => 56 bits
 
-            // Split into C and D (28 bits each)
+            // Split
             BitArray C = new(28);
             BitArray D = new(28);
             for (int i = 0; i < 28; i++)
@@ -140,11 +140,11 @@ namespace DES
             var roundKeys = new List<BitArray>();
             for (int round = 0; round < 16; round++)
             {
-                // Perform left shifts
+                // left shifts
                 C = LeftShift(C, Shifts[round]);
                 D = LeftShift(D, Shifts[round]);
 
-                // Combine C and D
+                // Combine
                 BitArray combinedCD = new(56);
                 for (int i = 0; i < 28; i++)
                 {
@@ -152,7 +152,7 @@ namespace DES
                     combinedCD[i + 28] = D[i];
                 }
 
-                // Apply PC-2 to get the round key
+                // Apply PC-2 and get round key
                 BitArray roundKey = Permute(combinedCD, PC2);
                 roundKeys.Add(roundKey);
             }
@@ -164,7 +164,7 @@ namespace DES
         {
             BitArray result = new(table.Length);
             for (int i = 0; i < table.Length; i++)
-                result[i] = input[table[i] - 1]; // -1 because DES tables are 1-indexed
+                result[i] = input[table[i] - 1];
             return result;
         }
 
